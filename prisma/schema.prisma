@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  user_id Int @id @default(autoincrement())
+  username String
+  password String
+  email String @unique
+  phone_number String
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  booking Booking?
+}
+
+model Rooms {
+  room_id Int @id @default(autoincrement())
+  roomname String
+  description String
+  price Int
+  availability_status Status @default(available)
+  createdAt DateTime @default(now())
+  booking Booking?
+}
+
+model Booking {
+  booking_id Int @id @default(autoincrement())
+  user_id Int @unique
+  room_id Int @unique
+  checkIn DateTime
+  checkOut DateTime
+  priceTotal Int
+  paymentSatus StatusPay @default(pending)
+  users Users @relation(fields: [user_id], references: [user_id])
+  rooms Rooms @relation(fields: [room_id], references: [room_id])
+  payment Payment?
+}
+
+model Payment {
+  payment_id Int @id @default(autoincrement())
+  booking_id Int @unique
+  payDate DateTime @default(now())
+  payMethod Method 
+  booking Booking @relation(fields: [booking_id], references: [booking_id])
+}
+
+enum Method {
+  credit_card
+  paypal
+  bank
+}
+
+enum StatusPay {
+  pending
+  paid
+}
+
+enum Status {
+  available
+  booked
+}
+
+enum Role {
+  ADMIN
+  USER
+}
